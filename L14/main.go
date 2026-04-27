@@ -1,10 +1,14 @@
 package main
 
 import (
+	"L14/database"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func getAll(w http.ResponseWriter, r *http.Request) {
@@ -18,6 +22,7 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAll(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -35,10 +40,21 @@ func postAll(w http.ResponseWriter, r *http.Request) {
 
 func startServer() {
 	fmt.Println("Server started on :8080")
-	http.ListenAndServe(":8080", nil)
+
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	database.ConnectDB()
+
 	allApis()
 	startServer()
 }
